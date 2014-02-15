@@ -1,6 +1,7 @@
 from .account import CoinbaseAccount
 from .account import Address
 from .auth import KeySecretAuthenticator
+from .button import Button
 from .client import urllib2
 from mock import Mock
 from .test_utils import MockReader
@@ -18,6 +19,33 @@ class CoinbaseAccountTestCase(unittest.TestCase):
 		account = CoinbaseAccount(self.authenticator)
 
 		self.assertEquals(account.authenticator, self.authenticator)
+
+	def test_create_button(self):
+		account = CoinbaseAccount(self.authenticator)
+
+		urllib2.urlopen = Mock(return_value=MockReader("""{
+  "success": true,
+  "button": {
+    "code": "93865b9cae83706ae59220c013bc0afd",
+    "type": "buy_now",
+    "style": "custom_large",
+    "text": "Pay With Bitcoin",
+    "name": "Sample Button",
+    "description": "Sample description",
+    "custom": "Order123",
+    "callback_url": "http://www.example.com/my_custom_button_callback",
+    "price": {
+      "cents": 1200,
+      "currency_iso": "USD"
+    }
+  }
+}"""))
+
+		button = account.create_button('Sample Button', '12.00', 'USD')
+
+		self.assertEquals(button.name, 'Sample Button')
+		self.assertEquals(button.price['cents'], 1200)
+		self.assertEquals(button.price['currency_iso'], 'USD')
 
 	def test_get_addresses(self):
 		account = CoinbaseAccount(self.authenticator)
