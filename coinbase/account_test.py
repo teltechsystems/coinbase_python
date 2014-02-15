@@ -19,6 +19,42 @@ class CoinbaseAccountTestCase(unittest.TestCase):
 
 		self.assertEquals(account.authenticator, self.authenticator)
 
+	def test_get_addresses(self):
+		account = CoinbaseAccount(self.authenticator)
+
+		urllib2.urlopen = Mock(return_value=MockReader("""{
+  "addresses": [
+    {
+      "address": {
+        "address": "moLxGrqWNcnGq4A8Caq8EGP4n9GUGWanj4",
+        "callback_url": null,
+        "label": "My Label",
+        "created_at": "2013-05-09T23:07:08-07:00"
+      }
+    },
+    {
+      "address": {
+        "address": "mwigfecvyG4MZjb6R5jMbmNcs7TkzhUaCj",
+        "callback_url": null,
+        "label": null,
+        "created_at": "2013-05-09T17:50:37-07:00"
+      }
+    }
+  ],
+  "total_count": 2,
+  "num_pages": 1,
+  "current_page": 1
+}"""))
+
+		addresses = account.get_addresses()
+
+		self.assertEquals(len(addresses), 2)
+
+		valid_addresses = ['moLxGrqWNcnGq4A8Caq8EGP4n9GUGWanj4', 'mwigfecvyG4MZjb6R5jMbmNcs7TkzhUaCj']
+
+		for i, address in enumerate(addresses):
+			self.assertEquals(address.address, valid_addresses[i])
+
 	def test_get_balance(self):
 		account = CoinbaseAccount(self.authenticator)
 
@@ -38,7 +74,6 @@ class CoinbaseAccountTestCase(unittest.TestCase):
 		address = account.get_receive_address()
 
 		self.assertIsInstance(address, Address)
-		self.assertEquals(address.success, True)
 		self.assertEquals(address.address, 'muVu2JZo8PbewBHRp6bpqFvVD87qvqEHWA')
 		self.assertEquals(address.callback_url, None)
 

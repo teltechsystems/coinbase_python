@@ -12,10 +12,9 @@ class Balance(object):
 		return '%.8f %s' % (self.amount, self.currency, )
 
 class Address(object):
-	__slots__ = ['success', 'address', 'callback_url', 'label']
+	__slots__ = ['address', 'callback_url', 'label']
 
-	def __init__(self, success, address, callback_url, label = ''):
-		self.success = success
+	def __init__(self, address, callback_url, label = ''):
 		self.address = address
 		self.callback_url = callback_url
 		self.label = label
@@ -26,6 +25,16 @@ class CoinbaseAccount(object):
 
 		self.authenticator = authenticator
 
+	def get_addresses(self):
+		paged_response = do_request(self.authenticator, 'GET', '/addresses')
+
+		addresses = []
+
+		for json_address in paged_response['addresses']:
+			addresses.append(Address(json_address['address']['address'], json_address['address']['callback_url'], json_address['address']['label']))
+
+		return addresses
+
 	def get_balance(self):
 		json_balance = do_request(self.authenticator, 'GET', '/account/balance')
 
@@ -34,4 +43,4 @@ class CoinbaseAccount(object):
 	def get_receive_address(self):
 		json_address = do_request(self.authenticator, 'GET', '/account/receive_address')
 
-		return Address(json_address['success'], json_address['address'], json_address['callback_url'])
+		return Address(json_address['address'], json_address['callback_url'])
