@@ -18,6 +18,6 @@ class CoinbaseAccount(object):
 		self.authenticator = authenticator
 
 	def get_balance(self):
-		json_balance = do_request(self.authenticator, 'POST', '/account/balance')
+		json_balance = do_request(self.authenticator, 'GET', '/account/balance')
 
 		return Balance(json_balance['amount'], json_balance['currency'])
