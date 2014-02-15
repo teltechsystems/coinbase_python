@@ -11,6 +11,15 @@ class Balance(object):
 	def __str__(self):
 		return '%.8f %s' % (self.amount, self.currency, )
 
+class Address(object):
+	__slots__ = ['success', 'address', 'callback_url', 'label']
+
+	def __init__(self, success, address, callback_url, label = ''):
+		self.success = success
+		self.address = address
+		self.callback_url = callback_url
+		self.label = label
+
 class CoinbaseAccount(object):
 	def __init__(self, authenticator):
 		assert isinstance(authenticator, Authenticator)
@@ -21,3 +30,8 @@ class CoinbaseAccount(object):
 		json_balance = do_request(self.authenticator, 'GET', '/account/balance')
 
 		return Balance(json_balance['amount'], json_balance['currency'])
+
+	def get_receive_address(self):
+		json_address = do_request(self.authenticator, 'GET', '/account/receive_address')
+
+		return Address(json_address['success'], json_address['address'], json_address['callback_url'])
